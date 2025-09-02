@@ -1,0 +1,137 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'org.liquibase.gradle' version '2.2.0'
+    id 'com.github.node-gradle.node' version '7.0.1'
+}
+
+group = 'com.techtallyinspector'
+version = '4.0.0'
+java.sourceCompatibility = JavaVersion.VERSION_17
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+    implementation 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // Database drivers
+    implementation 'io.r2dbc:r2dbc-postgresql'
+    implementation 'org.postgresql:postgresql'
+    implementation 'dev.miku:r2dbc-mysql'
+    implementation 'mysql:mysql-connector-java'
+    
+    // Liquibase
+    implementation 'org.liquibase:liquibase-core'
+    liquibaseRuntime 'org.liquibase:liquibase-core'
+    liquibaseRuntime 'org.postgresql:postgresql'
+    liquibaseRuntime 'mysql:mysql-connector-java'
+    
+    // Jackson for JSON processing
+    implementation 'com.fasterxml.jackson.core:jackson-core'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    
+    // Utility libraries
+    implementation 'org.apache.commons:commons-lang3'
+    implementation 'org.apache.commons:commons-collections4'
+    
+    // Development tools
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:mysql'
+}
+
+// Frontend build configuration
+node {
+    version = '20.10.0'
+    npmVersion = '10.2.3'
+    download = true
+    workDir = file("${project.buildDir}/nodejs")
+    npmWorkDir = file("${project.buildDir}/npm")
+    nodeProjectDir = file("${projectDir}/frontend")
+}
+
+task installFrontendDependencies(type: NpmTask) {
+    dependsOn npmSetup
+    args = ['install']
+    inputs.file('frontend/package.json')
+    outputs.dir('frontend/node_modules')
+}
+
+task buildFrontend(type: NpmTask) {
+    dependsOn installFrontendDependencies
+    args = ['run', 'build']
+    inputs.dir('frontend/src')
+    inputs.file('frontend/package.json')
+    inputs.file('frontend/vite.config.ts')
+    outputs.dir('frontend/dist')
+}
+
+task copyFrontend(type: Copy) {
+    dependsOn buildFrontend
+    from 'frontend/dist'
+    into 'src/main/resources/static'
+}
+
+// Database migration tasks
+liquibase {
+    activities {
+        main {
+            driver System.getenv('DB_DRIVER') ?: 'org.postgresql.Driver'
+            url System.getenv('DB_URL') ?: 'jdbc:postgresql://localhost:5432/techtallyinspector'
+            username System.getenv('DB_USERNAME') ?: 'postgres'
+            password System.getenv('DB_PASSWORD') ?: 'postgres'
+            changeLogFile 'src/main/resources/db/changelog/db.changelog-master.xml'
+        }
+        mysql {
+            driver 'com.mysql.cj.jdbc.Driver'
+            url System.getenv('MYSQL_URL') ?: 'jdbc:mysql://localhost:3306/techtallyinspector'
+            username System.getenv('MYSQL_USERNAME') ?: 'root'
+            password System.getenv('MYSQL_PASSWORD') ?: 'root'
+            changeLogFile 'src/main/resources/db/changelog/db.changelog-master.xml'
+        }
+    }
+}
+
+processResources {
+    dependsOn copyFrontend
+}
+
+bootJar {
+    archiveFileName = 'techtallyinspector-app.jar'
+    dependsOn copyFrontend
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// Gradle wrapper task
+wrapper {
+    gradleVersion = '8.5'
+}

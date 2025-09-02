@@ -1,0 +1,89 @@
+# Application Configuration
+spring.application.name=TechTally Inspector
+server.port=8080
+
+# Database Configuration
+# Default to PostgreSQL, can be overridden with environment variables
+app.database.type=${DB_TYPE:postgresql}
+app.database.host=${DB_HOST:localhost}
+app.database.port=${DB_PORT:5432}
+app.database.database=${DB_NAME:techtallyinspector}
+app.database.username=${DB_USERNAME:postgres}
+app.database.password=${DB_PASSWORD:postgres}
+
+# R2DBC Configuration
+spring.r2dbc.url=${app.database.r2dbc-url}
+spring.r2dbc.username=${app.database.username}
+spring.r2dbc.password=${app.database.password}
+
+# Liquibase Configuration
+spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.xml
+spring.liquibase.url=${app.database.jdbc-url}
+spring.liquibase.user=${app.database.username}
+spring.liquibase.password=${app.database.password}
+
+# JPA/Hibernate settings (for Liquibase)
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=true
+
+# Logging Configuration
+logging.level.org.springframework.data.r2dbc=DEBUG
+logging.level.io.r2dbc.postgresql.QUERY=DEBUG
+logging.level.liquibase=INFO
+logging.level.com.techtallyinspector=DEBUG
+
+# Quartz Scheduler Configuration
+spring.quartz.job-store-type=jdbc
+spring.quartz.properties.org.quartz.scheduler.instanceName=TechTallyInspectorScheduler
+spring.quartz.properties.org.quartz.scheduler.instanceId=AUTO
+spring.quartz.properties.org.quartz.jobStore.class=org.quartz.impl.jdbcjobstore.JobStoreTX
+spring.quartz.properties.org.quartz.jobStore.driverDelegateClass=org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+spring.quartz.properties.org.quartz.jobStore.tablePrefix=QRTZ_
+spring.quartz.properties.org.quartz.jobStore.isClustered=true
+spring.quartz.properties.org.quartz.jobStore.clusterCheckinInterval=20000
+
+# Security Configuration
+spring.security.user.name=admin
+spring.security.user.password=admin123
+spring.security.user.roles=ADMIN
+
+# Management and Monitoring
+management.endpoints.web.exposure.include=health,info,metrics,prometheus
+management.endpoint.health.show-details=when-authorized
+management.metrics.export.prometheus.enabled=true
+
+# Static Resources (for serving React app)
+spring.web.resources.static-locations=classpath:/static/
+spring.webflux.static-path-pattern=/**
+
+# File Upload Configuration
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+
+# Timezone
+spring.jpa.properties.hibernate.jdbc.time_zone=Europe/Moscow
+
+# Profile-specific configurations
+---
+spring.config.activate.on-profile=mysql
+
+# MySQL-specific Quartz delegate
+spring.quartz.properties.org.quartz.jobStore.driverDelegateClass=org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+
+---
+spring.config.activate.on-profile=development
+
+# Development-specific settings
+logging.level.org.springframework.web=DEBUG
+logging.level.org.springframework.security=DEBUG
+spring.devtools.restart.enabled=true
+
+---
+spring.config.activate.on-profile=production
+
+# Production-specific settings
+logging.level.org.springframework.data.r2dbc=WARN
+logging.level.io.r2dbc.postgresql.QUERY=WARN
+logging.level.com.techtallyinspector=INFO
+server.error.include-stacktrace=never
