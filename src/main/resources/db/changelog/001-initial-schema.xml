@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="001-001-config-table" author="migration">
+        <createTable tableName="config">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ad" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="domain1" type="VARCHAR(255)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="domain2" type="VARCHAR(255)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ldap" type="VARCHAR(255)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="usercanregistrate" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="useraddfromad" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="theme" type="VARCHAR(255)" defaultValue="default">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sitename" type="VARCHAR(255)" defaultValue="TechTally Inspector">
+                <constraints nullable="false"/>
+            </column>
+            <column name="emailadmin" type="VARCHAR(100)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="smtphost" type="VARCHAR(20)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="smtpauth" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="smtpport" type="VARCHAR(20)" defaultValue="25">
+                <constraints nullable="false"/>
+            </column>
+            <column name="smtpusername" type="VARCHAR(40)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="smtppass" type="VARCHAR(20)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="emailreplyto" type="VARCHAR(40)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sendemail" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="VARCHAR(10)" defaultValue="4.0.0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="urlsite" type="VARCHAR(200)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="001-002-config-common-table" author="migration">
+        <createTable tableName="config_common">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="var_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="var_value" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="var_description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="var_category" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="001-003-users-table" author="migration">
+        <createTable tableName="users">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="login" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="firstname" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="lastname" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="middlename" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="phone" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="position" type="VARCHAR(200)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="department" type="VARCHAR(200)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="001-004-user-roles-table" author="migration">
+        <createTable tableName="user_roles">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
